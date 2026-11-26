@@ -1,0 +1,36 @@
+{
+  "name": "pawforce-nexus-ec",
+  "version": "2.5.0",
+  "description": "PawForce Nexus EC - Plataforma Gamer, Cloud, Cabina y Emulación",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win portable",
+    "android:init": "npx cap add android && npx cap sync android"
+  },
+  "build": {
+    "appId": "com.pawforce.nexus.ec",
+    "productName": "PawForce Nexus EC",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "www/**/*"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "build/icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "@capacitor/cli": "^6.1.0"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/android": "^6.1.0"
+  }
+}
