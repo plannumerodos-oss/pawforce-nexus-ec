@@ -1,106 +1,47 @@
-name: Compilar PawForce Nexus EC (Todas las Plataformas)
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-jobs:
-  # 1. WINDOWS (.EXE PORTABLE)
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Instalar y compilar Windows EXE
-        run: |
-          npm install
-          npm run build:win
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 1-PawForce-Nexus-EC-Windows
-          path: dist/*.exe
-
-  # 2. ANDROID Y SMART TV (.APK)
-  build-android:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - name: Compilar Android y Smart TV APK
-        run: |
-          npm install
-          npm run android:init
-          mkdir -p android/app/src/main/res/drawable
-          cp build/icon.png android/app/src/main/res/drawable/ic_launcher.png || true
-          cp www/assets/tv-banner.png android/app/src/main/res/drawable/tv_banner.png || true
-          sed -i 's/<\/manifest>/<uses-feature android:name="android.software.leanback" android:required="false" \/><uses-feature android:name="android.hardware.touchscreen" android:required="false" \/><\/manifest>/g' android/app/src/main/AndroidManifest.xml
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 2-PawForce-Nexus-EC-Android-TV
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-
-  # 3. LINUX, STEAM DECK Y ROG ALLY (.AppImage)
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Compilar Linux / Steam Deck AppImage
-        run: |
-          npm install
-          npx electron-builder --linux AppImage
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 3-PawForce-Nexus-EC-Linux-SteamDeck
-          path: dist/*.AppImage
-
-  # 4. MACOS / MACBOOK (.DMG)
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Compilar macOS DMG
-        run: |
-          npm install
-          npx electron-builder --mac dmg
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 4-PawForce-Nexus-EC-macOS
-          path: dist/*.dmg
-
-  # 5. VERSIÓN WEB PARA XBOX, PLAYSTATION E IPHONE (GITHUB PAGES)
-  deploy-web-consoles:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'www'
-      - id: deployment
-        uses: actions/deploy-pages@v4
+{
+  "name": "pawforce-nexus-ec",
+  "version": "2.5.0",
+  "description": "PawForce Nexus EC - Plataforma Gamer, Cloud, Cabina y Emulacion",
+  "author": "PawForce Ecuador <soporte@pawforce.ec>",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win portable",
+    "android:init": "npx cap add android && npx cap sync android"
+  },
+  "build": {
+    "appId": "com.pawforce.nexus.ec",
+    "productName": "PawForce Nexus EC",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "www/**/*"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Game",
+      "icon": "build/icon.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.png",
+      "identity": null
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "@capacitor/cli": "^6.1.0"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/android": "^6.1.0"
+  }
+}
