@@ -11,7 +11,6 @@ permissions:
   id-token: write
 
 jobs:
-  # 1. WINDOWS (.EXE PORTABLE)
   build-windows:
     runs-on: windows-latest
     steps:
@@ -28,7 +27,6 @@ jobs:
           name: 1-PawForce-Nexus-EC-Windows
           path: dist/*.exe
 
-  # 2. ANDROID Y SMART TV (.APK)
   build-android:
     runs-on: ubuntu-latest
     steps:
@@ -56,7 +54,6 @@ jobs:
           name: 2-PawForce-Nexus-EC-Android-TV
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
-  # 3. LINUX Y STEAM DECK (.TAR.GZ PORTABLE)
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -75,7 +72,6 @@ jobs:
           name: 3-PawForce-Nexus-EC-Linux-SteamDeck
           path: dist/*.tar.gz
 
-  # 4. MACOS / MACBOOK (.ZIP SIN FIRMA APPLE)
   build-macos:
     runs-on: macos-latest
     steps:
@@ -88,13 +84,12 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
         run: |
           npm install
-     npx electron-builder --mac zip --arm64 -c.mac.icon=null 
+          npx electron-builder --mac zip --arm64 -c.mac.icon=null
       - uses: actions/upload-artifact@v6
         with:
           name: 4-PawForce-Nexus-EC-macOS
           path: dist/*.zip
 
-  # 5. VERSIÓN WEB PARA XBOX, PLAYSTATION E IPHONE (GITHUB PAGES)
   deploy-web-consoles:
     runs-on: ubuntu-latest
     environment:
