@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PawForce Nexus EC</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- SPLASH ANIMADO -->
+  <div id="splash-screen">
+    <img src="assets/logo.png" alt="PawForce Logo" class="splash-logo-img">
+    <h2 style="margin-top:14px; letter-spacing:2px; text-shadow:0 2px 10px #000;">PAWFORCE NEXUS <span style="color:var(--ec-yellow)">E</span><span style="color:var(--ec-blue)">C</span></h2>
+    <p style="font-size:0.85rem; color:#ddd; margin-top:4px;">Uniendo al Ecuador en la nube</p>
+    <div class="ec-stripe"></div>
+  </div>
+
+  <div id="crosshair"></div>
+
+  <!-- CINE FLOTANTE CABINA -->
+  <div id="cabina-tv-pip">
+    <div class="pip-header">
+      <span>📺 TV Cabina Ecuador</span>
+      <div>
+        <button onclick="setPipOpacity()" style="padding:1px 6px; font-size:0.7rem;">Opacidad</button>
+        <button onclick="closePip()" style="padding:1px 6px; font-size:0.7rem; background:#EF3340;">X</button>
+      </div>
+    </div>
+    <iframe id="pip-frame" style="width:100%; height:100%; border:none;" src="about:blank" allowfullscreen></iframe>
+    <video id="pip-video" style="display:none; width:100%; height:100%;" controls></video>
+  </div>
+
+  <!-- HEADER & GAME BAR -->
+  <header>
+    <div class="brand">
+      <img src="assets/logo.png" alt="Logo">
+      <span>PawForce Nexus</span>
+      <span class="ec-pill">ECUADOR</span>
+      <span style="font-size:0.72rem; background:#222; padding:2px 8px; border-radius:10px;" id="user-plan-badge">Gratuito (10GB)</span>
+    </div>
+
+    <div class="hud-bar">
+      <div>Ping EC: <span id="hud-ping">24 ms</span></div>
+      <div>FPS: <span id="hud-fps">60</span></div>
+      <div>RAM: <span id="hud-ram">80%</span></div>
+      <div>PawCoins: <span id="hud-coins">150</span> 🪙</div>
+      <div>Mando/TV: <span id="hud-pad">Listo</span></div>
+    </div>
+
+    <div style="display:flex; gap:6px; align-items:center;">
+      <select onchange="changeTheme(this.value)">
+        <option value="">Tema: Cyberpunk EC</option>
+        <option value="theme-win11">Windows 11 Gamer</option>
+        <option value="theme-steam">Steam Deck / TV</option>
+        <option value="theme-ps5">Dashboard PS5</option>
+      </select>
+      <button onclick="toggleAI()">🤖 PawForce AI</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="active" onclick="openTab('cloud', this)">⚡ Nube RTX & PS4/PS5</button>
+    <button onclick="openTab('p2p', this)">🖥️ Mercado PC P2P ($1-$100)</button>
+    <button onclick="openTab('offline', this)">🕹️ Consola Offline & Steam</button>
+    <button onclick="openTab('media', this)">📺 Cine Cabina & Música Web</button>
+    <button onclick="openTab('cabina', this)">🚌 Cabina Pro & Mods EC</button>
+    <button onclick="openTab('tools', this)">🛠️ Game Bar & Studio RGB</button>
+    <button onclick="openTab('plans', this)">💎 Planes & Rangos VIP</button>
+  </nav>
+
+  <!-- ASISTENTE VIRTUAL -->
+  <div id="ai-drawer">
+    <div class="ai-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <img src="assets/ai-avatar.png" alt="PF-AI">
+        <strong>PawForce AI (PF-AI)</strong>
+      </div>
+      <button onclick="toggleAI()" style="padding:2px 8px;">X</button>
+    </div>
+    <div id="ai-chat-box">
+      <div style="color:var(--ec-yellow); margin-bottom:6px;"><strong>PF-AI:</strong> ¡Qué más pana! Dime comandos como <em>"limpiar ram"</em>, <em>"poner radio"</em>, <em>"activar mira"</em> o pregúntame sobre rutas de Ecuador.</div>
+    </div>
+    <div style="display:flex; gap:4px; margin-bottom:8px;">
+      <input type="text" id="ai-input" placeholder="Escribe comando..." style="width:100%;" onkeypress="if(event.key==='Enter') askAI()">
+      <button onclick="askAI()">Ir</button>
+    </div>
+    <button onclick="startVoiceAI()" style="width:100%; font-size:0.75rem;">🎙️ Hablar por Voz ("Oye PawForce")</button>
+  </div>
+
+  <main>
+    <!-- 1. NUBE RTX & PS4/PS5 -->
+    <section id="tab-cloud" class="tab-content active">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+        <div>
+          <h3>Modo Ultra RTX & Estación PS4 / PS5 Cloud</h3>
+          <p style="font-size:0.8rem; color:#ccc;">Puente Quito-Bogotá activo (Sin VPN externa) | Ventanas desbloqueadas.</p>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button onclick="loadCloud('https://www.nvidia.com/es-la/geforce-now/')">GeForce NOW</button>
+          <button onclick="loadCloud('https://www.xbox.com/play')">Xbox Cloud</button>
+          <button onclick="loadCloud('https://store.steampowered.com')">Catálogo PS4/PS5 PC</button>
+          <button onclick="loadCloud('https://remoteplay.dl.playstation.net/remoteplay/')">PS Remote Play</button>
+        </div>
+      </div>
+      <iframe id="cloud-frame" class="viewport" src="about:blank" allow="gamepad; fullscreen; microphone; autoplay"></iframe>
+    </section>
+
+    <!-- 2. MERCADO P2P -->
+    <section id="tab-p2p" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3>Mercado P2P "PawForce Share" ($1 a $100 USD)</h3>
+          <p style="font-size:0.8rem; color:#ccc;">Alquila una PC gamer en Ecuador o comparte la tuya (Comisión plataforma: 10%).</p>
+        </div>
+        <button onclick="document.getElementById('host-form').style.display='block'">+ Publicar Mi PC</button>
+      </div>
+
+      <div id="host-form" class="card" style="display:none; margin-top:12px; border-color:var(--ec-yellow);">
+        <h4>Publicar Mi Equipo</h4>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+          <input type="text" id="host-name" placeholder="Nombre Equipo">
+          <input type="text" id="host-specs" placeholder="Specs (Ej: RTX 3060, 16GB RAM)">
+          <input type="number" id="host-price" min="1" max="100" value="2" placeholder="Precio ($1-$100)">
+          <button onclick="publishHostPC()">Publicar</button>
+        </div>
+      </div>
+
+      <div class="grid" id="p2p-list">
+        <div class="card">
+          <h4>🖥️ Rig Gamer Quito Norte #01</h4>
+          <p><strong>Specs:</strong> Ryzen 5 5600X • 32GB RAM • RTX 4060</p>
+          <p><strong>Ping:</strong> 14 ms (Fibra Quito)</p>
+          <div class="price">$1.50 <span style="font-size:0.8rem;">/hora</span></div>
+          <button style="width:100%;" onclick="rentPC('Rig Gamer Quito Norte #01', 1.50)">Alquilar Ahora</button>
+        </div>
+        <div class="card">
+          <h4>🖥️ Estación ATS Guayaquil Pro</h4>
+          <p><strong>Specs:</strong> Core i7 • 16GB RAM • RTX 3070 (ATS + Mapa EC)</p>
+          <p><strong>Ping:</strong> 22 ms</p>
+          <div class="price">$2.00 <span style="font-size:0.8rem;">/hora</span></div>
+          <button style="width:100%;" onclick="rentPC('Estación ATS Guayaquil Pro', 2.00)">Alquilar Ahora</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CONSOLA OFFLINE + STEAM -->
+    <section id="tab-offline" class="tab-content">
+      <div class="grid" style="margin-top:0; margin-bottom:12px;">
+        <div class="card">
+          <h4>🕹️ Emulador Offline (8 Consolas)</h4>
+          <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+            <select id="emu-core">
+              <option value="psp">PSP</option>
+              <option value="psx">PlayStation 1</option>
+              <option value="n64">Nintendo 64</option>
+              <option value="nds">Nintendo DS</option>
+              <option value="snes">Super Nintendo</option>
+              <option value="gba">Game Boy Advance</option>
+              <option value="segaMD">Sega Genesis</option>
+              <option value="arcade">Arcade MAME</option>
+            </select>
+            <input type="file" id="rom-input" accept=".iso,.cso,.bin,.cue,.z64,.n64,.nds,.smc,.sfc,.gba,.md,.zip">
+            <button onclick="startEmulator()">▶ Jugar Offline</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>🎮 Biblioteca Steam Local (Sin Internet)</h4>
+          <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+            <button onclick="scanSteam()">🔍 Escanear Juegos PC</button>
+            <button onclick="launchSteamOffline()">🚀 Steam Offline</button>
+          </div>
+          <div id="steam-games-list" style="font-size:0.78rem; color:var(--ec-yellow); margin-top:6px;"></div>
+        </div>
+      </div>
+
+      <div id="emulator-container" class="viewport" style="height:52vh; display:flex; align-items:center; justify-content:center; color:#777;">
+        <div id="game-canvas">Selecciona consola y carga tu ROM local para jugar sin internet.</div>
+      </div>
+    </section>
+
+    <!-- 4. CINE CABINA & MÚSICA WEB -->
+    <section id="tab-media" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h4>📺 Cine y TV Flotante en Cabina (ATS / Buses)</h4>
+          <p>Ventana flotante encima de tu simulador para ver películas o TV mientras manejas.</p>
+          <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+            <button onclick="openPipWeb('https://pluto.tv')">Pluto TV Gratis</button>
+            <button onclick="openPipWeb('https://www.youtube.com')">TV / Stream Cabina</button>
+          </div>
+          <input type="file" accept="video/*" onchange="openPipLocal(this)" style="width:100%; margin-top:8px;">
+        </div>
+
+        <div class="card">
+          <h4>🎵 Música Web en Segundo Plano</h4>
+          <p>Pega cualquier enlace web musical o radio de Ecuador; sonará mientras juegas.</p>
+          <div style="display:flex; gap:4px; margin-top:8px;">
+            <input type="text" id="web-music-url" placeholder="https://..." style="width:100%;">
+            <button onclick="playWebMusic()">▶ Sonar</button>
+          </div>
+          <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+            <!-- Cambia estas URLs por streams reales (terminan en .mp3 / .aac / /stream) -->
+            <button onclick="setPresetRadio('https://TU-STREAM-SYNTHWAVE/stream')">Radio Synthwave EC</button>
+            <button onclick="setPresetRadio('https://TU-STREAM-LOFI/stream')">Lo-Fi Rutas Quito</button>
+            <button onclick="stopWebMusic()">⏹ Stop</button>
+          </div>
+          <audio id="bg-audio-player" style="display:none;"></audio>
+          <iframe id="bg-web-music" src="about:blank" style="width:1px; height:1px; border:none; position:absolute; opacity:0;" allow="autoplay"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. CABINA PRO & MODS EC -->
+    <section id="tab-cabina" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h4>☁️ Nube Anti-Borrado (ATS / Buses)</h4>
+          <p>Espacio: <span id="cloud-used">2.4 GB</span> / <span id="cloud-total">10 GB Gratis</span></p>
+          <div style="background:#222; border-radius:6px; height:10px; margin:8px 0; overflow:hidden;">
+            <div id="storage-fill" style="width:24%; height:100%; background:var(--ec-yellow);"></div>
+          </div>
+          <button style="width:100%;" onclick="syncModsCloud()">🔄 Sincronizar Perfiles y Mods ATS</button>
+        </div>
+
+        <div class="card">
+          <h4>🎙️ Voceo de Paradas de Quito</h4>
+          <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+            <button onclick="speakAnnouncement('Próxima parada: Estación Labrador')">Estación Labrador</button>
+            <button onclick="speakAnnouncement('Próxima parada: Terminal Quitumbe')">Terminal Quitumbe</button>
+            <button onclick="speakAnnouncement('Servicio Quito Guayaquil. Por favor abróchese el cinturón')">Quito - Guayaquil</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>🚌 Descarga Oficial Mods Ecuador</h4>
+          <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+            <button onclick="window.open('https://steamcommunity.com/workshop/browse/?appid=270880&searchtext=Ecuador','_blank')">Mapa Ecuador VIP (ATS)</button>
+            <button onclick="window.open('https://steamcommunity.com/workshop/browse/?appid=227300&searchtext=Ecuador','_blank')">Mapa Ecuador (ETS2)</button>
+            <button onclick="window.open('https://store.steampowered.com/search/?term=proton+bus','_blank')">Trolebús & Ecovía (Proton Bus)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. GAME BAR & STUDIO RGB -->
+    <section id="tab-tools" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h4>🎨 Filtros & Mira Láser</h4>
+          <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+            <select onchange="setFilter(this.value)">
+              <option value="">Normal</option>
+              <option value="filter-hdr">HDR</option>
+              <option value="filter-crt">CRT</option>
+              <option value="filter-night">Noche</option>
+            </select>
+            <button onclick="toggleCrosshair()">🎯 Mira Láser</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>🌈 Studio RGB & Controles</h4>
+          <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; align-items:center;">
+            <input type="color" value="#FFD100" oninput="customAccent(this.value)">
+            <button onclick="toggleTouch()">📱 Táctil</button>
+            <button onclick="cleanRAM()">🚀 Limpiar RAM</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>📝 Bloc de Notas & Respaldo</h4>
+          <textarea id="gamer-notes" placeholder="Rutas, claves, ideas..." style="width:100%; height:90px; margin-top:8px;"></textarea>
+          <button style="width:100%; margin-top:6px;" onclick="exportBackup()">💾 Exportar Perfil (.JSON)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. PLANES & RANGOS VIP -->
+    <section id="tab-plans" class="tab-content">
+      <div class="grid" style="margin-top:0; margin-bottom:12px;">
+        <div class="card">
+          <h4>📺 Ver Anuncio (+50 PawCoins)</h4>
+          <button style="width:100%; margin-top:8px;" onclick="watchRewardedAd()">Ver Anuncio</button>
+        </div>
+        <div class="card">
+          <h4>🎟️ Canjear Código</h4>
+          <div style="display:flex; gap:4px; margin-top:8px;">
+            <input type="text" id="vip-code-input" placeholder="Código VIP" style="width:100%;">
+            <button onclick="redeemCode()">Canjear Código</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h4>Plan Gratuito</h4>
+          <div class="price">$0.00</div>
+          <p>• 2h nube/día + 10GB Nube Anti-Borrado</p>
+          <p>• Consola Offline 8 sistemas ilimitada</p>
+        </div>
+        <div class="card">
+          <h4>Básico EC</h4>
+          <div class="price">$2.99 <span style="font-size:0.8rem;">/mes</span></div>
+          <p>• 4h nube/día + 50GB Nube ATS</p>
+          <p>• 100% Sin Anuncios</p>
+        </div>
+        <div class="card">
+          <h4>Pro Gamer</h4>
+          <div class="price">$5.99 <span style="font-size:0.8rem;">/mes</span></div>
+          <p>• 6h nube RTX + 100GB Nube</p>
+          <p>• PF-AI ilimitado + 500 PawCoins</p>
+        </div>
+        <div class="card">
+          <h4>Ultra VIP</h4>
+          <div class="price">$9.99 <span style="font-size:0.8rem;">/mes</span></div>
+          <p>• Tiempo ilimitado 4K + 250GB Nube</p>
+          <p>• Soporte TV Box + 1,500 PawCoins</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- CONTROLES TÁCTILES -->
+  <div id="touch-controls" style="display:none; position:fixed; bottom:12px; right:12px; z-index:900; flex-direction:column; gap:6px; align-items:center; background:rgba(0,0,0,.6); padding:8px 12px; border-radius:12px;">
+    <strong style="font-size:0.75rem;">🕹️ PAD</strong>
+    <div style="display:flex; gap:6px;">
+      <button>A</button><button>B</button><button>X</button><button>Y</button>
+    </div>
+  </div>
+
+  <script>
+    let ipcRenderer = null;
+    try { ipcRenderer = require('electron').ipcRenderer; } catch (e) {}
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    window.addEventListener('load', () => {
+      const savedNotes = localStorage.getItem('pf_notes');
+      if (savedNotes) document.getElementById('gamer-notes').value = savedNotes;
+      setTimeout(() => {
+        const s = document.getElementById('splash-screen');
+        s.style.opacity = '0';
+        setTimeout(() => s.remove(), 800);
+      }, 3600);
+    });
+
+    document.getElementById('gamer-notes').addEventListener('input', (e) => localStorage.setItem('pf_notes', e.target.value));
+
+    function openTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function changeTheme(cls) { document.body.className = cls; }
+    function customAccent(color) { document.documentElement.style.setProperty('--accent', color); }
+    function setFilter(f) {
+      document.body.classList.remove('filter-hdr', 'filter-crt', 'filter-night');
+      if (f) document.body.classList.add(f);
+    }
+
+    function loadCloud(url) {
+      document.getElementById('cloud-frame').src = url;
+      openTab('cloud', document.querySelector('nav button'));
+    }
+
+    let pipOpacity = 1;
+    function openPipWeb(url) {
+      const pip = document.getElementById('cabina-tv-pip');
+      document.getElementById('pip-video').style.display = 'none';
+      const frame = document.getElementById('pip-frame');
+      frame.style.display = 'block';
+      frame.src = url;
+      pip.style.display = 'flex';
+    }
+    function openPipLocal(input) {
+      if (!input.files.length) return;
+      const pip = document.getElementById('cabina-tv-pip');
+      document.getElementById('pip-frame').style.display = 'none';
+      const vid = document.getElementById('pip-video');
+      vid.style.display = 'block';
+      vid.src = URL.createObjectURL(input.files[0]);
+      vid.play();
+      pip.style.display = 'flex';
+    }
+    function setPipOpacity() {
+      pipOpacity = pipOpacity === 1 ? 0.55 : 1;
+      document.getElementById('cabina-tv-pip').style.opacity = pipOpacity;
+    }
+    function closePip() {
+      document.getElementById('cabina-tv-pip').style.display = 'none';
+      document.getElementById('pip-frame').src = 'about:blank';
+      document.getElementById('pip-video').pause();
+    }
+
+    function playWebMusic() {
+      const url = document.getElementById('web-music-url').value.trim();
+      if (!url) return alert('Pega primero el enlace web o stream de audio.');
+      if (url.endsWith('.mp3') || url.endsWith('.ogg') || url.includes('stream')) {
+        const audio = document.getElementById('bg-audio-player');
+        audio.src = url;
+        audio.play();
+      } else {
+        document.getElementById('bg-web-music').src = url;
+      }
+    }
+    function setPresetRadio(streamUrl) {
+      const audio = document.getElementById('bg-audio-player');
+      audio.src = streamUrl;
+      audio.play();
+    }
+    function stopWebMusic() {
+      document.getElementById('bg-audio-player').pause();
+      document.getElementById('bg-web-music').src = 'about:blank';
+    }
+
+    function speakAnnouncement(text) {
+      if ('speechSynthesis' in window) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'es-ES';
+        msg.rate = 0.95;
+        window.speechSynthesis.speak(msg);
+      } else {
+        alert('Anuncio: ' + text);
+      }
+    }
+
+    function syncModsCloud() {
+      document.getElementById('storage-fill').style.width = '42%';
+      document.getElementById('cloud-used').innerText = '4.2 GB';
+      alert('✅ Perfiles de ATS y lista de Mods de Ecuador sincronizados en tu Nube PawForce.');
+    }
+
+    function publishHostPC() {
+      const name = document.getElementById('host-name').value || 'PC Gamer EC';
+      const specs = document.getElementById('host-specs').value || 'RTX Ready';
+      const price = parseFloat(document.getElementById('host-price').value) || 1;
+      if (price < 1 || price > 100) return alert('El precio debe estar entre $1 y $100 USD.');
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<h4>🖥️ ${esc(name)}</h4><p><strong>Specs:</strong> ${esc(specs)}</p><p><strong>Estado:</strong> En línea</p><div class="price">$${price.toFixed(2)} <span style="font-size:0.8rem;">/hora</span></div>`;
+      const btn = document.createElement('button');
+      btn.style.width = '100%';
+      btn.textContent = 'Alquilar Ahora';
+      btn.addEventListener('click', () => rentPC(name, price));
+      card.appendChild(btn);
+      document.getElementById('p2p-list').appendChild(card);
+      document.getElementById('host-form').style.display = 'none';
+    }
+    function rentPC(name, price) {
+      const fee = (price * 0.10).toFixed(2);
+      alert(`Reservando "${name}" por $${price.toFixed(2)} USD (Comisión plataforma: $${fee}). Conectando...`);
+    }
+
+    async function scanSteam() {
+      if (!ipcRenderer) return alert('Disponible en la versión de Windows (.exe).');
+      const games = await ipcRenderer.invoke('scan-steam-games');
+      const list = document.getElementById('steam-games-list');
+      list.textContent = games.length ? 'Encontrados: ' + games.map(g => g.name).join(', ') : 'No se encontraron juegos en la carpeta por defecto.';
+    }
+    function launchSteamOffline() {
+      if (!ipcRenderer) return alert('Disponible en Windows (.exe).');
+      ipcRenderer.send('launch-steam-offline');
+    }
+
+    function toggleAI() {
+      const d = document.getElementById('ai-drawer');
+      d.style.display = d.style.display === 'block' ? 'none' : 'block';
+    }
+    function askAI() {
+      const input = document.getElementById('ai-input');
+      const q = input.value.trim();
+      if (!q) return;
+      const box = document.getElementById('ai-chat-box');
+      box.innerHTML += `<div style="margin-bottom:6px;"><strong>Tú:</strong> ${esc(q)}</div>`;
+      input.value = '';
+      let reply = 'Entendido pana. Usa los botones superiores para navegar entre Nube RTX, Mercado P2P, Consola Offline o Cine en Cabina.';
+      const low = q.toLowerCase();
+      if (low.includes('ram') || low.includes('limpiar')) { cleanRAM(); reply = '¡Listo! Memoria RAM optimizada.'; }
+      else if (low.includes('mira')) { toggleCrosshair(); reply = 'Mira láser activada/desactivada en pantalla.'; }
+      else if (low.includes('radio') || low.includes('musica') || low.includes('música')) { setPresetRadio('https://TU-STREAM-SYNTHWAVE/stream'); reply = 'Poniendo Radio Synthwave Ecuador de fondo.'; }
+      else if (low.includes('geforce') || low.includes('nube')) { loadCloud('https://www.nvidia.com/es-la/geforce-now/'); reply = 'Abriendo GeForce NOW con el puente de Ecuador.'; }
+      box.innerHTML += `<div style="color:var(--ec-yellow); margin-bottom:6px;"><strong>PF-AI:</strong> ${reply}</div>`;
+      box.scrollTop = box.scrollHeight;
+    }
+    function startVoiceAI() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) return alert('Tu dispositivo no soporta reconocimiento de voz directo.');
+      const rec = new SpeechRec();
+      rec.lang = 'es-EC';
+      rec.onresult = (e) => {
+        document.getElementById('ai-input').value = e.results[0][0].transcript;
+        askAI();
+      };
+      rec.start();
+    }
+
+    function toggleCrosshair() { const ch = document.getElementById('crosshair'); ch.style.display = ch.style.display === 'block' ? 'none' : 'block'; }
+    function toggleTouch() { const tc = document.getElementById('touch-controls'); tc.style.display = tc.style.display === 'flex' ? 'none' : 'flex'; }
+    function cleanRAM() { document.getElementById('hud-ram').innerText = '92%'; }
+
+    let coins = 150;
+    function watchRewardedAd() {
+      alert('🎬 Anuncio patrocinado completado... ¡Ganaste +50 PawCoins!');
+      coins += 50;
+      document.getElementById('hud-coins').innerText = coins;
+    }
+    function redeemCode() {
+      const code = document.getElementById('vip-code-input').value.trim().toUpperCase();
+      const badge = document.getElementById('user-plan-badge');
+      if (code === 'ECUADOR2026' || code === 'PAWVIP') {
+        badge.innerText = 'Ultra VIP (250GB) 👑';
+        badge.style.background = '#EF3340';
+        document.getElementById('cloud-total').innerText = '250 GB VIP';
+        alert('¡Código Ultra VIP activado! Anuncios eliminados y 250GB desbloqueados.');
+      } else {
+        alert('Código inválido. Prueba con ECUADOR2026');
+      }
+    }
+    function exportBackup() {
+      const data = { coins, notes: document.getElementById('gamer-notes').value, date: new Date().toISOString() };
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+      a.download = 'PawForce_Backup_EC.json';
+      a.click();
+    }
+
+    function startEmulator() {
+      const input = document.getElementById('rom-input');
+      const core = document.getElementById('emu-core').value;
+      if (!input.files.length) return alert('Selecciona primero un archivo ROM.');
+      document.getElementById('game-canvas').innerHTML = '';
+      window.EJS_player = '#game-canvas';
+      window.EJS_core = core;
+      window.EJS_gameUrl = URL.createObjectURL(input.files[0]);
+      window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+      const s = document.createElement('script');
+      s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+      document.body.appendChild(s);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', 'ArrowLeft'].includes(e.key) && document.activeElement.tagName !== 'INPUT') {
+        const buttons = Array.from(document.querySelectorAll('nav button'));
+        const idx = buttons.indexOf(document.activeElement);
+        if (idx !== -1) {
+          const next = e.key === 'ArrowRight' ? (idx + 1) % buttons.length : (idx - 1 + buttons.length) % buttons.length;
+          buttons[next].focus();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
