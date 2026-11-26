@@ -11,6 +11,7 @@ permissions:
   id-token: write
 
 jobs:
+  # 1. WINDOWS (.EXE PORTABLE)
   build-windows:
     runs-on: windows-latest
     steps:
@@ -27,6 +28,7 @@ jobs:
           name: 1-PawForce-Nexus-EC-Windows
           path: dist/*.exe
 
+  # 2. ANDROID Y SMART TV (.APK)
   build-android:
     runs-on: ubuntu-latest
     steps:
@@ -54,6 +56,7 @@ jobs:
           name: 2-PawForce-Nexus-EC-Android-TV
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
+  # 3. LINUX Y STEAM DECK (.TAR.GZ PORTABLE)
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -61,15 +64,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Compilar Linux / Steam Deck AppImage
+      - name: Compilar Linux / Steam Deck Portable
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
         run: |
           npm install
-          npx electron-builder --linux AppImage
+          npx electron-builder --linux tar.gz
       - uses: actions/upload-artifact@v4
         with:
           name: 3-PawForce-Nexus-EC-Linux-SteamDeck
-          path: dist/*.AppImage
+          path: dist/*.tar.gz
 
+  # 4. MACOS / MACBOOK (.ZIP SIN FIRMA APPLE)
   build-macos:
     runs-on: macos-latest
     steps:
@@ -77,15 +83,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Compilar macOS DMG
+      - name: Compilar macOS Portable
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
         run: |
           npm install
-          npx electron-builder --mac dmg
+          npx electron-builder --mac zip
       - uses: actions/upload-artifact@v4
         with:
           name: 4-PawForce-Nexus-EC-macOS
-          path: dist/*.dmg
+          path: dist/*.zip
 
+  # 5. VERSIÓN WEB PARA XBOX, PLAYSTATION E IPHONE (GITHUB PAGES)
   deploy-web-consoles:
     runs-on: ubuntu-latest
     environment:
