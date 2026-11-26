@@ -106,6 +106,43 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+  // === TÚNEL AUTOMÁTICO INTELIGENTE US (ZERO-LAG PAC) ===
+const https = require('https');
+
+function autoConnectSmartUS() {
+https.get('https://proxyscrape.com', (res) => {
+    let data = '';
+    res.on('data', chunk => data += chunk);
+    res.on('end', async () => {
+      const proxies = data.split('\r\n').filter(p => p.includes(':'));
+      if (proxies.length > 0) {
+        const proxy = proxies[0];
+        const pacScript = `
+          function FindProxyForURL(url, host) {
+            if (shExpMatch(host, "*nvidiagrid.net*") || shExpMatch(host, "*stun*") || shExpMatch(host, "*turn*")) return "DIRECT";
+            if (shExpMatch(host, "*geforcenow.com*") || shExpMatch(host, "*nvidia.com*") || shExpMatch(host, "*xbox.com*")) return "PROXY ${proxy}; DIRECT";
+            return "DIRECT";
+          }
+        `;
+        const pacUrl = 'data:application/x-ns-proxy-autoconfig;base64,' + Buffer.from(pacScript).toString('base64');
+        await session.defaultSession.setProxy({ pacScript: pacUrl });
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('vpn-status', { active: true, server: proxy });
+        }
+      }
+    });
+  }).on('error', () => {});
+}
+
+app.whenReady().then(() => {
+  setTimeout(autoConnectSmartUS, 1200);
+});
+
+ipcMain.handle('rotate-us-node', async () => {
+  autoConnectSmartUS();
+  return { ok: true };
+});
+
   globalShortcut.unregisterAll();
   if (process.platform !== 'darwin') app.quit();
 });
