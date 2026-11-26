@@ -1,0 +1,12 @@
+{
+  "appId": "com.pawforce.nexus.ec",
+  "appName": "PawForce Nexus EC",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": ["*"]
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
