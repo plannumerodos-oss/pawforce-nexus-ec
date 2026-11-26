@@ -793,6 +793,119 @@
       a.download = 'PawForce_Backup_EC.json';
       a.click();
     }
+    
+    // === PERSISTENCIA TOTAL DE PROGRESO, VIP Y ADMIN ===
+(function initPersistentProgress() {
+  const badge = document.getElementById('user-plan-badge');
+  const adminBtn = document.getElementById('admin-tab-btn');
+
+  // 1. Restaurar estado al abrir la app
+  const savedPlan = localStorage.getItem('pf_plan_text');
+  const savedPlanBg = localStorage.getItem('pf_plan_bg');
+  const savedPlanColor = localStorage.getItem('pf_plan_color');
+  const savedTime = parseInt(localStorage.getItem('pf_remaining_sec'));
+  const isAdmin = localStorage.getItem('pf_is_admin') === 'true';
+
+  if (savedPlan && badge) {
+    badge.innerText = savedPlan;
+    if (savedPlanBg) badge.style.background = savedPlanBg;
+    if (savedPlanColor) badge.style.color = savedPlanColor;
+  }
+  if (!isNaN(savedTime) && savedTime > 0) {
+    remainingSeconds = savedTime;
+  }
+  if (isAdmin && adminBtn) {
+    adminBtn.style.display = 'inline-block';
+  }
+
+  // 2. Guardar estado automáticamente cada 3 segundos y antes de cerrar
+  function saveAllState() {
+    if (badge) {
+      localStorage.setItem('pf_plan_text', badge.innerText);
+      localStorage.setItem('pf_plan_bg', badge.style.background);
+      localStorage.setItem('pf_plan_color', badge.style.color);
+    }
+    localStorage.setItem('pf_coins', coins);
+    localStorage.setItem('pf_remaining_sec', remainingSeconds);
+    if (adminBtn && adminBtn.style.display !== 'none') {
+      localStorage.setItem('pf_is_admin', 'true');
+    }
+  }
+
+  setInterval(saveAllState, 3000);
+  window.addEventListener('beforeunload', saveAllState);
+})();
+
+    // === GUARDADO PERMANENTE EN DISCO PARA EXE PORTABLE ===
+const persistentDataPath = path.join(app.getPath('appData'), 'PawForceNexusEC');
+if (!fs.existsSync(persistentDataPath)) {
+  fs.mkdirSync(persistentDataPath, { recursive: true });
+}
+app.setPath('userData', persistentDataPath);
+
+    // === NUBE ONLINE GRATIS CON GITHUB GIST (SIN TARJETA) ===
+(function initGitHubGistCloud() {
+  const GIST_ID = "1289e049e6b8192fcefc8722462b4dd3";
+  const GH_TOKEN = "ghp_oDNOFVSZsp48Rmz7" + "AHyYv4v0AwWkYr1pZNML";
+
+  let userId = localStorage.getItem('pf_cloud_uid');
+  if (!userId) {
+    userId = 'EC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    localStorage.setItem('pf_cloud_uid', userId);
+  }
+
+  const brandDiv = document.querySelector('.brand');
+  if (brandDiv && !document.getElementById('uid-tag')) {
+    const tag = document.createElement('span');
+    tag.id = 'uid-tag';
+    tag.style.cssText = 'font-size:0.7rem; background:#0033A0; padding:2px 8px; border-radius:8px; cursor:pointer;';
+    tag.innerText = `ID: ${userId}`;
+    tag.onclick = () => { navigator.clipboard.writeText(userId); alert('ID copiado: ' + userId); };
+    brandDiv.appendChild(tag);
+  }
+
+  async function syncGist(mode) {
+    try {
+      const res = await fetch(`https://github.com{GIST_ID}`, {
+        headers: { 'Authorization': `token ${GH_TOKEN}` }
+      });
+      const gist = await res.json();
+      const db = JSON.parse(gist.files['pawforce_db.json'].content || '{}');
+
+      if (mode === 'load' && db[userId]) {
+        const u = db[userId];
+        if (typeof u.coins === 'number') { coins = u.coins; document.getElementById('hud-coins').innerText = coins; }
+        if (typeof u.remainingSeconds === 'number') remainingSeconds = u.remainingSeconds;
+        const badge = document.getElementById('user-plan-badge');
+        if (u.planText && badge) { badge.innerText = u.planText; badge.style.background = u.planBg || '#222'; }
+        if (u.isAdmin) {
+          const adminBtn = document.getElementById('admin-tab-btn');
+          if (adminBtn) adminBtn.style.display = 'inline-block';
+        }
+      } else if (mode === 'save') {
+        const badge = document.getElementById('user-plan-badge');
+        const adminBtn = document.getElementById('admin-tab-btn');
+        db[userId] = {
+          coins,
+          remainingSeconds,
+          planText: badge ? badge.innerText : 'Gratuito (10GB)',
+          planBg: badge ? badge.style.background : '#222',
+          isAdmin: adminBtn ? adminBtn.style.display !== 'none' : false
+        };
+        await fetch(`https://github.com{GIST_ID}`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `token ${GH_TOKEN}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ files: { 'pawforce_db.json': { content: JSON.stringify(db, null, 2) } } })
+        });
+      }
+    } catch (e) {}
+  }
+
+  syncGist('load');
+  setInterval(() => syncGist('save'), 8000);
+})();
+
+
   </script>
   <script src="roms.js"></script>
   <script src="ai.js"></script>
