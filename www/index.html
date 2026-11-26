@@ -422,16 +422,26 @@
   </div>
 
   <script>
+    // Reemplaza alert() por un aviso que no bloquea la ventana (arregla el bug de Electron
+    // donde los campos de texto dejan de aceptar escritura después de un alert)
+    window.alert = function (msg) {
+      const t = document.createElement('div');
+      t.textContent = String(msg);
+      t.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#0d111a;color:#fff;border:2px solid #FFD100;border-radius:12px;padding:12px 18px;z-index:99999;max-width:90%;box-shadow:0 10px 30px #000;font-size:.9rem';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    };
+
     let ipcRenderer = null;
     try { ipcRenderer = require('electron').ipcRenderer; } catch (e) {}
 
     // ====== CONFIGURA AQUÍ TUS JUEGOS 1-CLIC ======
     // Usa solo juegos que tengas derecho a distribuir (propios, homebrew, dominio público, con licencia).
     const INSTANT_GAMES = [
-      { name: '🥊 Juego 1', url: 'https://TU-JUEGO-1/' },
-      { name: '🍄 Juego 2', url: 'https://TU-JUEGO-2/' },
-      { name: '🥋 Juego 3', url: 'https://TU-JUEGO-3/' },
-      { name: '🐉 Juego 4', url: 'https://TU-JUEGO-4/' }
+      { name: '🎮 Juego 1', url: 'https://TU-JUEGO-1/' },
+      { name: '🎮 Juego 2', url: 'https://TU-JUEGO-2/' },
+      { name: '🎮 Juego 3', url: 'https://TU-JUEGO-3/' },
+      { name: '🎮 Juego 4', url: 'https://TU-JUEGO-4/' }
     ];
 
     function esc(s) {
