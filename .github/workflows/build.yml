@@ -1,51 +1,46 @@
-name: Compilar PawForce Nexus EC (Windows EXE y Android TV APK)
+name: Compilar PawForce Nexus EC (Todas las Plataformas)
 
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
+  # 1. WINDOWS (.EXE PORTABLE)
   build-windows:
     runs-on: windows-latest
     steps:
-      - name: Descargar código
-        uses: actions/checkout@v4
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Instalar y compilar EXE portable
+      - name: Instalar y compilar Windows EXE
         run: |
           npm install
           npm run build:win
-
-      - name: Subir EXE de Windows
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: PawForce-Nexus-EC-Windows
+          name: 1-PawForce-Nexus-EC-Windows
           path: dist/*.exe
 
+  # 2. ANDROID Y SMART TV (.APK)
   build-android:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar código
-        uses: actions/checkout@v4
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Configurar Java JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Generar proyecto Android, copiar iconos/banner TV y compilar APK
+      - name: Compilar Android y Smart TV APK
         run: |
           npm install
           npm run android:init
@@ -56,9 +51,56 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-
-      - name: Subir APK Android / Smart TV
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: PawForce-Nexus-EC-Android-TV
+          name: 2-PawForce-Nexus-EC-Android-TV
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+  # 3. LINUX, STEAM DECK Y ROG ALLY (.AppImage)
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Compilar Linux / Steam Deck AppImage
+        run: |
+          npm install
+          npx electron-builder --linux AppImage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 3-PawForce-Nexus-EC-Linux-SteamDeck
+          path: dist/*.AppImage
+
+  # 4. MACOS / MACBOOK (.DMG)
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Compilar macOS DMG
+        run: |
+          npm install
+          npx electron-builder --mac dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 4-PawForce-Nexus-EC-macOS
+          path: dist/*.dmg
+
+  # 5. VERSIÓN WEB PARA XBOX, PLAYSTATION E IPHONE (GITHUB PAGES)
+  deploy-web-consoles:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'www'
+      - id: deployment
+        uses: actions/deploy-pages@v4
